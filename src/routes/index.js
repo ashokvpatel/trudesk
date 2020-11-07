@@ -335,6 +335,8 @@ function mainRoutes (router, middleware, controllers) {
   require('../controllers/api/v1/routes')(middleware, router, controllers)
   // v2
   require('../controllers/api/v2/routes')(middleware, router, controllers)
+  // t1
+  require('../controllers/api/t1/routes')(middleware, router, controllers)
 
   router.get('/api/v1/plugins/list/installed', middleware.api, function (req, res) {
     return res.json({ success: true, loadedPlugins: global.plugins })

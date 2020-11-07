@@ -1116,6 +1116,71 @@ ticketSchema.statics.getTicketsByRequester = function (userId, callback) {
   return q.exec(callback)
 }
 
+ticketSchema.statics.getTicketsByRequesterWithLimit = function (userId, limit, page, callback) {
+  if (_.isUndefined(userId)) return callback('Invalid Requester Id - TicketSchema.GetTicketsByRequester()', null)
+
+  var self = this
+
+  var q = self
+    .model(COLLECTION)
+    .find({ owner: userId, deleted: false })
+    .populate(
+      'owner assignee comments.owner notes.owner subscribers history.owner',
+      'username fullname email role image title'
+    )
+    .populate('type tags')
+    .populate({
+      path: 'group',
+      model: groupSchema,
+      populate: [
+        {
+          path: 'members',
+          model: userSchema,
+          select: '-__v -iOSDeviceTokens -accessToken -tOTPKey'
+        },
+        {
+          path: 'sendMailTo',
+          model: userSchema,
+          select: '-__v -iOSDeviceTokens -accessToken -tOTPKey'
+        }
+      ]
+    })
+
+  if (limit) {
+    q.limit(limit).skip(page * limit)
+  }
+  return q.exec(callback)
+}
+
+ticketSchema.statics.getUserTicketsWithSearchString = function (userId, search, callback) {
+  if (_.isUndefined(userId)) return callback('Invalid Post Data - TicketSchema.GetTicketsWithSearchString()', null)
+
+  var self = this
+
+  var tickets = []
+
+  var q = self
+    .model(COLLECTION)
+    .find({
+      owner: userId,
+      deleted: false,
+      subject: { $regex: `.*${search}.*`, $options: 'i' }
+    })
+    .populate(
+      'owner assignee comments.owner notes.owner subscribers history.owner',
+      'username fullname email role image title'
+    )
+    .populate('type tags group')
+    .limit(100)
+
+  q.exec(function (err, results) {
+    if (err) return callback(err)
+    tickets.push(results)
+
+    return callback(null, tickets)
+  })
+}
+
 ticketSchema.statics.getTicketsWithSearchString = function (grps, search, callback) {
   if (_.isUndefined(grps) || _.isUndefined(search))
     return callback('Invalid Post Data - TicketSchema.GetTicketsWithSearchString()', null)

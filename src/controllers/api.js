@@ -26,7 +26,7 @@ var apiPluginsV1 = require('./api/v1/plugins')
 var apiController = {}
 
 apiController.index = function (req, res) {
-  return res.json({ supported: ['v1', 'v2'] })
+  return res.json({ supported: ['v1', 'v2', 't1'] })
 }
 
 apiController.v1 = {}
@@ -51,5 +51,8 @@ apiController.v2.teams = require('./api/v2/teams')
 apiController.v2.departments = require('./api/v2/departments')
 apiController.v2.elasticsearch = require('./api/v2/elasticsearch')
 apiController.v2.mailer = require('./api/v2/mailer')
+
+apiController.t1 = {}
+apiController.t1.tickets = require('./api/t1/tickets')
 
 module.exports = apiController
